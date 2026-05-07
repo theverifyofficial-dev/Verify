@@ -8,6 +8,7 @@ import '../../model/Home_model.dart';
 import '../Insurace/Health.dart';
 import '../Insurace/Motor.dart';
 import '../Services/Service_Page.dart';
+import '../Services/Temp_service.dart';
 import 'Sub_Srceen/PropertyBylist.dart';
 import 'Sub_Srceen/Types/Godown.dart';
 import 'Sub_Srceen/Types/Office.dart';
@@ -41,7 +42,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   ];
 
   final List<Map<String, dynamic>> categories = [
-    {'title': 'Services', 'image': 'assets/Icons/mechanic.png', 'page': ServicePage()},
+    {'title': 'Services', 'image': 'assets/Icons/mechanic.png', 'page': TempServicePage()},
     {'title': 'Insurance', 'image': 'assets/Icons/cardiogram.png', 'page': HealthPage()},
     {'title': 'Vehicle Alert', 'image': 'assets/Icons/car.png', 'page': Motor()},
   ];
@@ -205,7 +206,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       ),
     );
   }
-  
 }
 
 class _TabBarDelegate extends SliverPersistentHeaderDelegate {

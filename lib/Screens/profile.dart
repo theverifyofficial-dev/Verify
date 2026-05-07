@@ -23,7 +23,6 @@ class SocialLink {
   });
 }
 
-
 class Profile extends StatefulWidget {
   const Profile({super.key});
 
@@ -32,6 +31,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+
   String name = '';
   String email = '';
   String number = '';
@@ -80,7 +80,6 @@ class _ProfileState extends State<Profile> {
       url: "https://www.snapchat.com/@verify_real",
     ),
   ];
-
 
   @override
   void initState() {
@@ -142,7 +141,6 @@ class _ProfileState extends State<Profile> {
     } catch (e) {
     }
   }
-
 
   void _launchURL(String url) async {
     final uri = Uri.parse(url);
@@ -269,7 +267,6 @@ class _ProfileState extends State<Profile> {
       ),
     );
   }
-
 
   Future<void> _deleteAccount() async {
     if (id == 0) {
@@ -713,4 +710,3 @@ class _ProfileState extends State<Profile> {
   }
 
 }
-
