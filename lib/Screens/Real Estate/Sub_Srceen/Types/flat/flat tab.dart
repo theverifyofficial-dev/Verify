@@ -17,6 +17,7 @@ class FlatPropertyTabs extends StatelessWidget {
             TabBar(
               labelColor: Colors.black,
               unselectedLabelColor: Colors.grey,
+              dividerColor: Colors.white, // border line color
               indicatorColor: Colors.blue,
               labelStyle: TextStyle(fontWeight: FontWeight.bold),
               tabs: [

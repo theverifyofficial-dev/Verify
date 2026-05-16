@@ -1,115 +1,94 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:Verify/Screens/Splash.dart';
-import 'Themes/theme_provider.dart';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
 
+/// Local Notification Init
 Future<void> initLocalNotifications() async {
-  const AndroidInitializationSettings initializationSettingsAndroid =
+  const AndroidInitializationSettings androidSettings =
   AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  const InitializationSettings initializationSettings =
-  InitializationSettings(
-    android: initializationSettingsAndroid,
+  const InitializationSettings settings = InitializationSettings(
+    android: androidSettings,
   );
 
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-      onDidReceiveNotificationResponse: (details) {
-      });
+  await flutterLocalNotificationsPlugin.initialize(
+    settings,
+    onDidReceiveNotificationResponse: (details) {},
+  );
 }
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+/// Background FCM Handler
+Future<void> _firebaseMessagingBackgroundHandler(
+    RemoteMessage message,
+    ) async {
   await Firebase.initializeApp();
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
   await Firebase.initializeApp();
+
   await initLocalNotifications();
 
-  FirebaseMessaging.instance.subscribeToTopic("wollengod");
-
-
-  // Register background handler
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
-      child: const MyApp(),
-    ),
+  /// Background notifications
+  FirebaseMessaging.onBackgroundMessage(
+    _firebaseMessagingBackgroundHandler,
   );
+
+  /// Topic subscribe
+  await FirebaseMessaging.instance.subscribeToTopic("wollengod");
+
+  runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+  State<MyApp> createState() => _MyAppState();
+}
 
-    // 🔥 Setup FCM permissions + listeners
+class _MyAppState extends State<MyApp> {
+
+  @override
+  void initState() {
+    super.initState();
     _initFCM();
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Verify',
-      theme: ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: Colors.white,
-        colorScheme: const ColorScheme.light(
-          primary: Colors.black,          // Active icon/text
-          onSurface: Colors.black87,     // Inactive icon/text
-        ),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Colors.black),
-        ),
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: Colors.black,
-        colorScheme: const ColorScheme.dark(
-          primary: Colors.white,
-          onSurface: Colors.white70,
-        ),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Colors.white),
-        ),
-      ),
-      themeMode: themeProvider.themeMode, // magic here
-      home: SplashScreen(),
-    );
   }
 
-  void _initFCM() {
-    // Request permission
-    FirebaseMessaging.instance.requestPermission();
+  Future<void> _initFCM() async {
 
-    // Get FCM token
-    FirebaseMessaging.instance.getToken().then((token) {
-    });
+    /// Request permission
+    await FirebaseMessaging.instance.requestPermission();
 
-    // Foreground notifications
+    /// Get token
+    String? token = await FirebaseMessaging.instance.getToken();
+
+    debugPrint("FCM TOKEN: $token");
+
+    /// Foreground notifications
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
 
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
 
       if (notification != null && android != null) {
+
         await flutterLocalNotificationsPlugin.show(
           notification.hashCode,
           notification.title,
           notification.body,
           const NotificationDetails(
             android: AndroidNotificationDetails(
-              'default_channel',       // channel id
-              'Default',               // channel name
+              'default_channel',
+              'Default Notifications',
               importance: Importance.max,
               priority: Priority.high,
             ),
@@ -117,7 +96,32 @@ class MyApp extends StatelessWidget {
         );
       }
     });
+
+    /// Notification click
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      debugPrint("Notification Clicked");
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Verify',
+
+      /// FIXED LIGHT THEME
+      theme: ThemeData(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: Colors.white,
+
+        colorScheme: const ColorScheme.light(
+          primary: Colors.black,
+          onSurface: Colors.black87,
+        ),
+      ),
+
+      home: SplashScreen(),
+    );
   }
 }

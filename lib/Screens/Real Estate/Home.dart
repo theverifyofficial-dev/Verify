@@ -6,9 +6,8 @@ import 'package:Verify/utilities/hex_color.dart';
 import '../../custom_widget/Searchbar.dart';
 import '../../model/Home_model.dart';
 import '../Insurace/Health.dart';
-import '../Insurace/Motor.dart';
+import '../Vehicle/Dashboard.dart';
 import '../Services/Service_Page.dart';
-import '../Services/Temp_service.dart';
 import 'Sub_Srceen/PropertyBylist.dart';
 import 'Sub_Srceen/Types/Godown.dart';
 import 'Sub_Srceen/Types/Office.dart';
@@ -42,7 +41,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   ];
 
   final List<Map<String, dynamic>> categories = [
-    {'title': 'Services', 'image': 'assets/Icons/mechanic.png', 'page': TempServicePage()},
+    {'title': 'Services', 'image': 'assets/Icons/mechanic.png', 'page': ServicePage()},
     {'title': 'Insurance', 'image': 'assets/Icons/cardiogram.png', 'page': HealthPage()},
     {'title': 'Vehicle Alert', 'image': 'assets/Icons/car.png', 'page': Motor()},
   ];
@@ -180,6 +179,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             body: RefreshIndicator(
               onRefresh: _onRefresh,
               child: TabBarView(
+
                 controller: _tabController,
                 physics: const BouncingScrollPhysics(),
                 children: propertyTypes.map((item) {
@@ -232,7 +232,8 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
             controller: controller,
             isScrollable: !isWide, // ✅ if wide, spread equally
             indicatorColor: Colors.blue.shade800,
-            indicatorWeight: 3,
+              dividerColor: Colors.white, // border line color
+              indicatorWeight: 3,
             labelColor: Colors.blue.shade800,
             unselectedLabelColor: Colors.black,
             labelStyle: TextStyle(

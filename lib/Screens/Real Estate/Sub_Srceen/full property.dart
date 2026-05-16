@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:Verify/Themes/theme-helper.dart';
+import 'package:Verify/utilities/theme-helper.dart';
 import 'package:Verify/utilities/hex_color.dart';
 import '../../../custom_widget/Paths.dart';
 import '../../../custom_widget/Preview.dart';
