@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Verify/utilities/theme-helper.dart';
 import 'package:Verify/custom_widget/Paths.dart';
 import 'package:Verify/utilities/hex_color.dart';
+import '../main.dart';
 import 'Homepage.dart';
 import 'Reset_password/forget.dart';
 import 'SignUp.dart';
@@ -26,6 +27,9 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passController = TextEditingController();
 
   Future<void>loginUser() async {
+
+    String fcmToken = await getFCMToken();
+
     const String url = 'https://verifyrealestateandservices.in/PHP_Files/Login_Main_App/Login_Main_APP.php';
     final response  = await http.post(Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
@@ -33,9 +37,12 @@ class _LoginPageState extends State<LoginPage> {
             {
               'Mobile': _mobileController.text,
               'Passwords': _passController.text,
+              'FCM': fcmToken,
             }
         ));
     final data= json.decode(response.body);
+
+    print(data);
     if(response.statusCode==200 && data['status'] == 'success'){
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content:
@@ -57,6 +64,11 @@ class _LoginPageState extends State<LoginPage> {
       await shared_pref.setString('email', emailFromAPI);
       await shared_pref.setString('number', mobileFromAPI);
       await shared_pref.setInt('id', IDFromAPI);
+      /// SAVE FCM TOKEN
+      await shared_pref.setString(
+        'fcm_token',
+        fcmToken,
+      );
 
       if (profileImage != null && profileImage.isNotEmpty) {
         String fullUrl =

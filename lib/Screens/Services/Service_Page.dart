@@ -400,7 +400,7 @@ class _ServicePageState extends State<ServicePage> {
                   ),
                 ),
                 onPressed: () => Navigator.pop(context),
-                child: const Text("Got it"),
+                child: const Text("Got it",style: TextStyle(color: Colors.white),),
               ),
             ],
           ),

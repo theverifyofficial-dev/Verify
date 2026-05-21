@@ -5,11 +5,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-/// Local Notification Init
 Future<void> initLocalNotifications() async {
+
   const AndroidInitializationSettings androidSettings =
   AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -17,17 +16,66 @@ Future<void> initLocalNotifications() async {
     android: androidSettings,
   );
 
-  await flutterLocalNotificationsPlugin.initialize(
-    settings,
-    onDidReceiveNotificationResponse: (details) {},
+  await flutterLocalNotificationsPlugin.initialize(settings);
+
+  /// ALERT CHANNEL
+  const AndroidNotificationChannel channel =
+  AndroidNotificationChannel(
+    'vehicle_alerts_v2',
+    'Vehicle Alerts',
+    description: 'Critical vehicle alert notifications',
+    importance: Importance.max,
+    playSound: true,
+    enableVibration: true,
   );
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+      AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
 }
 
-/// Background FCM Handler
+Future<String> getFCMToken() async {
+  String? token = await FirebaseMessaging.instance.getToken();
+  return token ?? "";
+}
+
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
     RemoteMessage message,
     ) async {
+
   await Firebase.initializeApp();
+
+  await showVehicleAlert(message);
+}
+
+Future<void> showVehicleAlert(RemoteMessage message) async {
+
+  await flutterLocalNotificationsPlugin.show(
+    DateTime.now().millisecondsSinceEpoch ~/ 1000,
+
+    message.data['title'] ?? "Vehicle Alert",
+    message.data['body'] ?? "Alert received",
+
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        'vehicle_alerts_v2',
+        'Vehicle Alerts',
+
+        importance: Importance.max,
+        priority: Priority.high,
+
+        playSound: true,
+        enableVibration: true,
+
+        fullScreenIntent: true,
+        category: AndroidNotificationCategory.alarm,
+
+        ticker: 'Vehicle Alert',
+      ),
+    ),
+  );
 }
 
 void main() async {
@@ -73,35 +121,18 @@ class _MyAppState extends State<MyApp> {
 
     debugPrint("FCM TOKEN: $token");
 
-    /// Foreground notifications
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
 
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
+      await showVehicleAlert(message);
 
-      if (notification != null && android != null) {
-
-        await flutterLocalNotificationsPlugin.show(
-          notification.hashCode,
-          notification.title,
-          notification.body,
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              'default_channel',
-              'Default Notifications',
-              importance: Importance.max,
-              priority: Priority.high,
-            ),
-          ),
-        );
-      }
     });
 
-    /// Notification click
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint("Notification Clicked");
     });
   }
+
+
 
   @override
   Widget build(BuildContext context) {

@@ -57,12 +57,14 @@ dependencies:
   youtube_player_flutter: ^9.1.2
   flutter_image_compress: ^2.0.4
   firebase_performance: ^0.10.1+10
+  mobile_scanner: ^7.0.1
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.14.3
+  flutter_lints: ^5.0.0
 
 flutter_icons:
   android: true
@@ -73,8 +75,6 @@ flutter_icons:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
-
 # For information on th
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

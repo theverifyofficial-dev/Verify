@@ -16,8 +16,7 @@ class RegisterVehiclePage extends StatefulWidget {
       _RegisterVehiclePageState();
 }
 
-class _RegisterVehiclePageState
-    extends State<RegisterVehiclePage> {
+class _RegisterVehiclePageState extends State<RegisterVehiclePage> {
 
   final _formKey = GlobalKey<FormState>();
 

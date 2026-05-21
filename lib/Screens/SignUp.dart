@@ -7,6 +7,7 @@ import 'package:Verify/Screens/Homepage.dart';
 import 'package:Verify/custom_widget/Paths.dart';
 import 'package:Verify/utilities/hex_color.dart';
 import '../custom_widget/back_button.dart';
+import '../main.dart';
 import 'Splash.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -239,6 +240,8 @@ class _SignUpPageState extends State<SignUpPage> {
   void _handleSignUp() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
+      String fcmToken = await getFCMToken();
+
       final url = Uri.parse('https://verifyrealestateandservices.in/PHP_Files/Ragister_Main_App/ragister.php');
       final response = await http.post(
         url,
@@ -248,6 +251,7 @@ class _SignUpPageState extends State<SignUpPage> {
           'Mobile': _mobileController.text.trim(),
           'Email': _emailController.text.trim(),
           'Passwords': _passController.text.trim(),
+          'FCM': fcmToken,
         },
       );
 
@@ -264,6 +268,8 @@ class _SignUpPageState extends State<SignUpPage> {
             await prefs.setString('email', user['Email']);
             await prefs.setString('number', user['Mobile']);
             await prefs.setInt('id', user['id']);
+            /// SAVE FCM TOKEN LOCALLY
+            await prefs.setString('fcm_token', fcmToken);
 
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Sign up successful")));
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Homepage()));

@@ -6,11 +6,23 @@
     <!-- ✅ Permissions must be here, before <application> -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission
+        android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <uses-permission
+        android:name="android.permission.VIBRATE"/>
 
     <application
         android:label="Verify"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="vehicle_alerts_v2"/>
 
         <activity
             android:name=".MainActivity"
@@ -40,6 +52,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
     </application>
 
     <queries>

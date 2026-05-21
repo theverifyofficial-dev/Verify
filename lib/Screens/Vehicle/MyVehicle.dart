@@ -17,8 +17,7 @@ class MyRegisteredVehicles extends StatefulWidget {
       _MyRegisteredVehiclesState();
 }
 
-class _MyRegisteredVehiclesState
-    extends State<MyRegisteredVehicles> {
+class _MyRegisteredVehiclesState extends State<MyRegisteredVehicles> {
 
   List vehicles = [];
 
