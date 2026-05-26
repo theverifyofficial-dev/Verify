@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Verify/Screens/Services/Temp_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,7 +8,6 @@ import '../../custom_widget/Searchbar.dart';
 import '../../model/Home_model.dart';
 import '../Insurace/Health.dart';
 import '../Vehicle/Dashboard.dart';
-import '../Services/Service_Page.dart';
 import 'Sub_Srceen/PropertyBylist.dart';
 import 'Sub_Srceen/Types/Godown.dart';
 import 'Sub_Srceen/Types/Office.dart';
@@ -41,7 +41,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   ];
 
   final List<Map<String, dynamic>> categories = [
-    {'title': 'Services', 'image': 'assets/Icons/mechanic.png', 'page': ServicePage()},
+    {'title': 'Services', 'image': 'assets/Icons/mechanic.png', 'page': TempServicePage()},
     {'title': 'Insurance', 'image': 'assets/Icons/cardiogram.png', 'page': HealthPage()},
     {'title': 'Vehicle Alert', 'image': 'assets/Icons/car.png', 'page': Motor()},
   ];
