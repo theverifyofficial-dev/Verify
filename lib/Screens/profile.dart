@@ -10,6 +10,7 @@ import 'package:Verify/Screens/Loginpage.dart';
 import 'package:Verify/custom_widget/Paths.dart';
 
 import 'Real Estate/wishlist.dart';
+import 'Services/My_service.dart';
 
 class SocialLink {
   final String title;
@@ -500,6 +501,22 @@ class _ProfileState extends State<Profile> {
                     MaterialPageRoute(builder: (_) => const WishlistPage()),
                   );
                 },
+              ),
+              const SizedBox(height: 10),
+              _optionTile(
+                "My Services",
+                Icons.home_repair_service_outlined,
+                    () {
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const MyServicesTabbarPage(),
+                    ),
+                  );
+                },
+
+                subtitle: "Track your booked services",
               ),
               const SizedBox(height: 20),
 

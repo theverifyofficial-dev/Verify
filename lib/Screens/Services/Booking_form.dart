@@ -12,6 +12,7 @@ import 'package:Verify/utilities/hex_color.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import '../../custom_widget/Paths.dart';
 import '../../custom_widget/back_button.dart';
+import 'My_service.dart';
 
 class ServiceBookingPage extends StatefulWidget {
   final String serviceID;
@@ -43,7 +44,7 @@ class _ServiceBookingPageState extends State<ServiceBookingPage> {
   final TextEditingController _Longitude = TextEditingController();
   final TextEditingController _Latitude = TextEditingController();
 
-  List<File> issueImages = [];
+  File? issueImage;
   final ImagePicker _picker = ImagePicker();
 
   final List<String> timeSlots = [
@@ -71,32 +72,22 @@ class _ServiceBookingPageState extends State<ServiceBookingPage> {
     return result != null ? File(result.path) : file;
   }
 
-  Future<void> _pickImages() async {
-    final pickedFiles = await _picker.pickMultiImage();
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+    );
 
-    if (pickedFiles.length > 5) {
-      showSnack("Max 5 images allowed", error: true);
-      return;
-    }
+    if (pickedFile != null) {
+      File file = File(pickedFile.path);
 
-    if (pickedFiles.isNotEmpty) {
-      List<File> temp = [];
-
-      for (var img in pickedFiles) {
-        File file = File(img.path);
-
-        /// 🔥 COMPRESS HERE
-        File compressed = await compressImage(file);
-
-        temp.add(compressed);
-      }
+      /// 🔥 COMPRESS IMAGE
+      File compressed = await compressImage(file);
 
       setState(() {
-        issueImages = temp;
+        issueImage = compressed;
       });
     }
   }
-
   void showSnack(String message, {bool error = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -175,59 +166,125 @@ class _ServiceBookingPageState extends State<ServiceBookingPage> {
   }
 
   void _showSuccessDialog() {
+
     showDialog(
       context: context,
+
+      barrierDismissible: false,
+
       builder: (_) => Dialog(
+
         backgroundColor: Colors.white,
+
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
         ),
+
         child: Padding(
           padding: const EdgeInsets.all(24),
+
           child: Column(
             mainAxisSize: MainAxisSize.min,
+
             children: [
-              Icon(Icons.check_circle,
-                  color: "#001234".toColor(), size: 60),
 
-              const SizedBox(height: 16),
+              Container(
+                height: 80,
+                width: 80,
 
-              const Text(
-                "Service Booked!",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                    color: Colors.black54
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  shape: BoxShape.circle,
                 ),
-              ),
 
-              const SizedBox(height: 8),
-
-              const Text(
-                "Our agent will contact you soon.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black54),
+                child: Icon(
+                  Icons.check_circle,
+                  color: Colors.green.shade700,
+                  size: 60,
+                ),
               ),
 
               const SizedBox(height: 20),
 
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: "#001234".toColor(),
+              const Text(
+                "Service Booked Successfully",
+
+                textAlign: TextAlign.center,
+
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
                 ),
-                child: const Text("OK"),
-              )
+              ),
+
+              const SizedBox(height: 10),
+
+              Text(
+                "We are now finding the best technician for your service request.",
+
+                textAlign: TextAlign.center,
+
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              SizedBox(
+                width: double.infinity,
+
+                child: ElevatedButton(
+
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: "#001234".toColor(),
+
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 15,
+                    ),
+
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(14),
+                    ),
+                  ),
+
+                  onPressed: () {
+
+                    Navigator.pop(context);
+
+                    Navigator.pushReplacement(
+                      context,
+
+                      MaterialPageRoute(
+                        builder: (_) =>
+                        const MyServicesTabbarPage(
+                          initialIndex: 0,
+                        ),
+                      ),
+                    );
+                  },
+
+                  child: const Text(
+                    "Track My Service",
+
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
-
   @override
   void dispose() {
     _debounce?.cancel();
@@ -260,7 +317,7 @@ class _ServiceBookingPageState extends State<ServiceBookingPage> {
     final userNumber = prefs.getString('number') ?? '';
     final email = prefs.getString('email') ?? '';
 
-    final Uri url = Uri.parse('https://verifyrealestateandservices.in/Second%20PHP%20FILE/service_api/service_api.php');
+    final Uri url = Uri.parse('https://verifyrealestateandservices.in/Second%20PHP%20FILE/service_application/service_api.php');
     final request = http.MultipartRequest('POST', url);
 
     request.fields.addAll({
@@ -275,23 +332,25 @@ class _ServiceBookingPageState extends State<ServiceBookingPage> {
       'address_for_services': locationController.text.trim(),
       'description': descriptionController.text.trim(),
 
-
     }
 
     );
-    for (int i = 0; i < issueImages.length; i++) {
+
+    if (issueImage != null) {
       request.files.add(
         await http.MultipartFile.fromPath(
-          'issue_images[]', // 👈 backend must match this
-          issueImages[i].path,
+          'issue_images',
+          issueImage!.path,
         ),
       );
     }
+
     setState(() => isLoading = true);
 
     try {
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
+      print(response.body);
       if (response.statusCode == 200 && response.body.contains("success")) {
         _showSuccessDialog();
       } else {
@@ -568,9 +627,9 @@ class _ServiceBookingPageState extends State<ServiceBookingPage> {
         const SizedBox(height: 10),
 
         GestureDetector(
-          onTap: isLoading ? null : _pickImages,
+          onTap: isLoading ? null : _pickImage,
           child: Container(
-            height: 100,
+            height: issueImage == null ? 100 : 120,
             width: double.infinity,
             decoration: BoxDecoration(
               color: "#EEF5FF".toColor(),
@@ -579,7 +638,7 @@ class _ServiceBookingPageState extends State<ServiceBookingPage> {
                 color: "#001234".toColor().withOpacity(0.2),
               ),
             ),
-            child: issueImages.isEmpty
+            child: issueImage == null
                 ? Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -587,57 +646,50 @@ class _ServiceBookingPageState extends State<ServiceBookingPage> {
                     color: "#001234".toColor()),
                 const SizedBox(height: 6),
                 Text(
-                  "Tap to add images",
+                  "Tap to add image",
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey.shade600,
                   ),
                 ),
-
               ],
             )
-                : ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: issueImages.length,
-              itemBuilder: (context, index) {
-                return Stack(
-                  children: [
+                : Stack(
+              children: [
+                Container(
+                  margin: const EdgeInsets.all(10),
+                  width: 100,
+                  height: 100,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.file(
+                      issueImage!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
 
-                    Container(
-                      margin: const EdgeInsets.all(6),
-                      width: 80,
-                      height: 80,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.file(
-                          issueImages[index],
-                          fit: BoxFit.cover,
-                        ),
+                Positioned(
+                  right: 4,
+                  top: 4,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        issueImage = null;
+                      });
+                    },
+                    child: const CircleAvatar(
+                      radius: 10,
+                      backgroundColor: Colors.red,
+                      child: Icon(
+                        Icons.close,
+                        size: 12,
+                        color: Colors.white,
                       ),
                     ),
-
-                    /// ❌ remove button
-                    Positioned(
-                      right: 4,
-                      top: 4,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            issueImages.removeAt(index);
-                          });
-                        },
-                        child: const CircleAvatar(
-                          radius: 10,
-                          backgroundColor: Colors.red,
-                          child: Icon(Icons.close,
-                              size: 12, color: Colors.white),
-                        ),
-                      ),
-                    )
-
-                  ],
-                );
-              },
+                  ),
+                )
+              ],
             ),
           ),
         ),
