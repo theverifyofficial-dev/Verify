@@ -502,22 +502,22 @@ class _ProfileState extends State<Profile> {
                   );
                 },
               ),
-              // const SizedBox(height: 10),
-              // _optionTile(
-              //   "My Services",
-              //   Icons.home_repair_service_outlined,
-              //       () {
-              //
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(
-              //         builder: (_) => const MyServicesTabbarPage(),
-              //       ),
-              //     );
-              //   },
-              //
-              //   subtitle: "Track your booked services",
-              // ),
+              const SizedBox(height: 10),
+              _optionTile(
+                "My Services",
+                Icons.home_repair_service_outlined,
+                    () {
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const MyServicesTabbarPage(),
+                    ),
+                  );
+                },
+
+                subtitle: "Track your booked services",
+              ),
               const SizedBox(height: 20),
 
               const Divider(color: Colors.black12),
