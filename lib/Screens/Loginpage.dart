@@ -30,6 +30,12 @@ class _LoginPageState extends State<LoginPage> {
 
     String fcmToken = await getFCMToken();
 
+    String token = await getFCMToken();
+
+    if (token.isEmpty) {
+      token = "IOS_SIMULATOR";
+    }
+
     const String url = 'https://verifyrealestateandservices.in/PHP_Files/Login_Main_App/Login_Main_APP.php';
     final response  = await http.post(Uri.parse(url),
         headers: {'Content-Type': 'application/json'},

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:Verify/utilities/hex_color.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../Screens/Real Estate/search_result.dart';
+import '../utilities/hex_color.dart';
 
 class NeumorphicSearchBar extends StatefulWidget {
   final String HintText;
@@ -16,9 +18,84 @@ class NeumorphicSearchBar extends StatefulWidget {
   State<NeumorphicSearchBar> createState() => _NeumorphicSearchBarState();
 }
 
-class _NeumorphicSearchBarState extends State<NeumorphicSearchBar> {
-
+class _NeumorphicSearchBarState extends State<NeumorphicSearchBar>
+    with SingleTickerProviderStateMixin {
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _searchText = '';
   final TextEditingController _controller = TextEditingController();
+
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+      lowerBound: 0.9,
+      upperBound: 1.2,
+    )..addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _speech.stop();
+    super.dispose();
+  }
+
+  void _listen() async {
+    HapticFeedback.lightImpact();
+
+    final status = await Permission.microphone.status;
+    if (!status.isGranted) {
+      final result = await Permission.microphone.request();
+      if (!result.isGranted) return;
+    }
+
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('STATUS: $val'),
+        onError: (val) => print('ERROR: $val'),
+      );
+
+      if (available) {
+        setState(() => _isListening = true);
+        _animationController.repeat(reverse: true);
+
+        _speech.listen(
+          onResult: (val) {
+            setState(() {
+              _searchText = val.recognizedWords;
+              _controller.text = _searchText;
+              _controller.selection = TextSelection.fromPosition(
+                TextPosition(offset: _controller.text.length),
+              );
+            });
+
+            if (val.finalResult && _searchText.trim().isNotEmpty) {
+              setState(() {
+                _isListening = false;
+              });
+              _speech.stop();
+              _animationController.stop();
+              _animationController.value = 1.0;
+              _navigateToResult(_searchText.trim());
+            }
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _animationController.stop();
+      _animationController.value = 1.0;
+      _speech.stop();
+    }
+  }
 
   void _navigateToResult(String keyword) {
     if (keyword.isNotEmpty) {
@@ -29,12 +106,6 @@ class _NeumorphicSearchBarState extends State<NeumorphicSearchBar> {
         ),
       );
     }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -72,7 +143,6 @@ class _NeumorphicSearchBarState extends State<NeumorphicSearchBar> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: TextField(
-                      onChanged: (_) => setState(() {}),
                       controller: _controller,
                       style: const TextStyle(fontSize: 16, color: Colors.white),
                       cursorColor: Colors.cyanAccent,
@@ -86,6 +156,7 @@ class _NeumorphicSearchBarState extends State<NeumorphicSearchBar> {
                           onPressed: () {
                             setState(() {
                               _controller.clear();
+                              _searchText = '';
                             });
                           },
                         )
@@ -99,36 +170,34 @@ class _NeumorphicSearchBarState extends State<NeumorphicSearchBar> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      final text = _controller.text.trim();
-                      if (text.isNotEmpty) {
-                        _navigateToResult(text);
-                      }
-                    },
+                    onTap: _listen,
                     child: Transform.scale(
-                      scale: 1.0,
+                      scale: _isListening ? _animationController.value : 1.0,
                       child: Container(
                         margin: const EdgeInsets.only(right: 6),
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.blue,
+                          color: _isListening ? Colors.redAccent : Colors.blue,
                           shape: BoxShape.circle,
-                          boxShadow: [
+                          boxShadow: _isListening
+                              ? [
                             BoxShadow(
-                              color: Colors.blue.withOpacity(0.4),
-                              blurRadius: 10,
+                              color: Colors.redAccent.withOpacity(0.6),
+                              blurRadius: 20,
                               spreadRadius: 1,
                             ),
-                          ],
+                          ]
+                              : [],
                         ),
-                        child: const Icon(
-                          Icons.send, // 🔥 changed here
+                        child: Icon(
+                          _isListening ? Icons.mic_off : Icons.mic_none,
                           size: 20,
                           color: Colors.white,
                         ),
                       ),
                     ),
-                  ),                ],
+                  ),
+                ],
               ),
             ),
           ),

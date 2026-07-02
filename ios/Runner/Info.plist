@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -24,6 +26,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -41,9 +45,23 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
+<key>NSCameraUsageDescription</key>
+<string>Verify uses the camera to scan QR codes, upload service request images, capture profile photos, and register vehicles.</string>
+
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Verify uses your location to help find nearby properties, autofill your address, and improve location-based search. Your location is only accessed when required by features you choose to use.</string>
+
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Verify uses your location to help you find nearby properties, autofill your address when booking home services, and improve location-based search. You can also enter your address manually.</string>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Verify needs access to your photo library so you can upload profile photos, service request images, property-related images, and vehicle photos.</string>
+
+<key>NSSpeechRecognitionUsageDescription</key>
+<string>Verify uses speech recognition to convert your voice into text when you use the voice search feature.</string>
+
+<key>NSMicrophoneUsageDescription</key>
+<string>Verify uses the microphone only when you choose to perform a voice search.</string>
+
 </dict>
 </plist>

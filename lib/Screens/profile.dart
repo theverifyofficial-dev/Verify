@@ -492,6 +492,21 @@ class _ProfileState extends State<Profile> {
               _infoTile("Email", email, Icons.email),
               _infoTile("Phone", number, Icons.phone),
               const SizedBox(height: 10),
+
+              _optionTile(
+                "My Service",
+                Icons.home_repair_service,
+                    () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) =>  const MyServicesTabbarPage(
+                      initialIndex: 0,
+                    ),),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+
               _optionTile(
                 "Wishlist",
                 Icons.favorite_border,
@@ -502,22 +517,9 @@ class _ProfileState extends State<Profile> {
                   );
                 },
               ),
-              const SizedBox(height: 10),
-              _optionTile(
-                "My Services",
-                Icons.home_repair_service_outlined,
-                    () {
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const MyServicesTabbarPage(),
-                    ),
-                  );
-                },
 
-                subtitle: "Track your booked services",
-              ),
+
               const SizedBox(height: 20),
 
               const Divider(color: Colors.black12),

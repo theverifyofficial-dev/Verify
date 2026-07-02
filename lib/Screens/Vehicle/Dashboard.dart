@@ -10,7 +10,6 @@ import 'Qr_scan.dart';
 import 'Vehicle_result.dart';
 import 'Vehicle_form.dart';
 
-
 class Motor extends StatefulWidget {
   const Motor({super.key});
 

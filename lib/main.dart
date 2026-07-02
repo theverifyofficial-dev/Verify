@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:Verify/Screens/Splash.dart';
 
@@ -7,18 +9,23 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
+
 Future<void> initLocalNotifications() async {
 
   const AndroidInitializationSettings androidSettings =
   AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  const InitializationSettings settings = InitializationSettings(
+  const DarwinInitializationSettings iosSettings =
+  DarwinInitializationSettings();
+
+  const InitializationSettings settings =
+  InitializationSettings(
     android: androidSettings,
+    iOS: iosSettings,
   );
 
   await flutterLocalNotificationsPlugin.initialize(settings);
 
-  /// ALERT CHANNEL
   const AndroidNotificationChannel channel =
   AndroidNotificationChannel(
     'vehicle_alerts_v2',
@@ -36,8 +43,33 @@ Future<void> initLocalNotifications() async {
 }
 
 Future<String> getFCMToken() async {
-  String? token = await FirebaseMessaging.instance.getToken();
-  return token ?? "";
+  try {
+
+    if (Platform.isIOS) {
+
+      final apnsToken =
+      await FirebaseMessaging.instance.getAPNSToken();
+
+      debugPrint("APNS TOKEN: $apnsToken");
+
+      if (apnsToken == null) {
+        return "";
+      }
+    }
+
+    final token =
+    await FirebaseMessaging.instance.getToken();
+
+    debugPrint("FCM TOKEN: $token");
+
+    return token ?? "";
+
+  } catch (e) {
+
+    debugPrint("FCM ERROR: $e");
+
+    return "";
+  }
 }
 
 @pragma('vm:entry-point')
@@ -90,9 +122,6 @@ void main() async {
     _firebaseMessagingBackgroundHandler,
   );
 
-  /// Topic subscribe
-  await FirebaseMessaging.instance.subscribeToTopic("wollengod");
-
   runApp(const MyApp());
 }
 
@@ -113,26 +142,37 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _initFCM() async {
 
-    /// Request permission
-    await FirebaseMessaging.instance.requestPermission();
+    try {
 
-    /// Get token
-    String? token = await FirebaseMessaging.instance.getToken();
+      await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
 
-    debugPrint("FCM TOKEN: $token");
+      if (Platform.isIOS) {
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+        final apnsToken =
+        await FirebaseMessaging.instance.getAPNSToken();
 
-      await showVehicleAlert(message);
+        debugPrint("APNS TOKEN: $apnsToken");
 
-    });
+        if (apnsToken != null) {
+          await FirebaseMessaging.instance
+              .subscribeToTopic("wollengod");
+        }
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      debugPrint("Notification Clicked");
-    });
+      } else {
+
+        await FirebaseMessaging.instance
+            .subscribeToTopic("wollengod");
+      }
+
+    } catch (e) {
+
+      debugPrint("FCM INIT ERROR: $e");
+    }
   }
-
-
 
   @override
   Widget build(BuildContext context) {

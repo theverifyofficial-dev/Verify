@@ -17,17 +17,15 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.swaven.verifyapp"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"
-
+    ndkVersion = "28.2.13676358"
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
-    }
+        jvmTarget = "17"    }
 
     defaultConfig {
         applicationId = "com.swaven.verifyapp"
@@ -61,7 +59,6 @@ flutter {
 }
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
-}
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")}
 
 apply(plugin = "com.google.gms.google-services")
