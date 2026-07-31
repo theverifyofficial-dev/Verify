@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:Verify/Screens/Loginpage.dart';
 import 'package:Verify/custom_widget/Paths.dart';
 
+import 'Real Estate/Visit Property/Booked Visits.dart';
 import 'Real Estate/wishlist.dart';
 import 'Services/My_service.dart';
 
@@ -68,7 +69,7 @@ class _ProfileState extends State<Profile> {
     SocialLink(
       title: "WhatsApp",
       assetPath: AppImages.whatsapp,
-      url: "https://wa.me/919711773800",
+      url: "https://wa.me/919711776400",
     ),
     SocialLink(
       title: "Twitter",
@@ -493,6 +494,17 @@ class _ProfileState extends State<Profile> {
               _infoTile("Phone", number, Icons.phone),
               const SizedBox(height: 10),
 
+              _optionTile(
+                "My Visits",
+                Icons.event_available_rounded,
+                    () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) =>  const PropertyVisitHistoryPage(),),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
               _optionTile(
                 "My Service",
                 Icons.home_repair_service,

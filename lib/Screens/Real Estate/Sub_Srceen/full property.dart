@@ -10,8 +10,10 @@ import '../../../custom_widget/Paths.dart';
 import '../../../custom_widget/Preview.dart';
 import '../../../custom_widget/Youtube_video.dart';
 import '../../../custom_widget/back_button.dart';
+import '../../../model/Calculate_model.dart';
 import '../../../model/detailed_property_model.dart';
 import '../../../model/image_model.dart';
+import '../Visit Property/Visit Book.dart';
 
 class Full_Property extends StatefulWidget {
   const Full_Property({super.key});
@@ -134,234 +136,6 @@ class _Full_PropertyState extends State<Full_Property> {
         });
       }
     }
-  }
-
-  Future<void> bookSchedule({
-    required String id,
-    required String location,
-    required String info,
-    required String furnished,
-    required String bhk,
-    required String type,
-    required String userId,
-    required String userName,
-    required String phoneNumber,
-    required String address, // user’s address or property address
-    required String fieldworkerName, // user’s address or property address
-    required String fieldworkerNumber, // user’s address or property address
-    required String visitingDate,
-    required String visitingTime,
-  })
-  async {
-    final url = Uri.parse(
-        'https://verifyrealestateandservices.in/Second%20PHP%20FILE/book_shedual/book_shedual.php');
-
-    final body = {
-      'user_ids': userId,
-      'user_names': userName,
-      'property_id': id,
-      'locations': location,
-      'booking_date': bookingDate,
-      'visiting_date': visitingDate,
-      'visiting_time': visitingTime,
-      'descriptions': info,
-      'furnished': furnished,
-      'addresss': address,
-      'BHK': bhk,
-      'type_of_property': type,
-      'phone_number': phoneNumber,
-      'fieldworkar_name': fieldworkerName,
-      'fieldworkar_number': fieldworkerNumber,
-    };
-
-    final response = await http.post(url, body: body);
-
-    if (response.statusCode == 200 && response.body.contains('success')) {
-
-      setState(() {
-        isBooked = true;
-      });
-
-      _showSuccessDialog(
-        date: visitingDate,
-        time: visitingTime,
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Booking Failed: ${response.body}')),
-      );
-    }
-  }
-
-  void _showSuccessDialog({String? date, String? time}) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-
-              // 🔥 Success Circle with subtle glow
-              Container(
-                height: 90,
-                width: 90,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: "#001234".toColor().withOpacity(0.08),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.check_rounded,
-                    size: 48,
-                    color: "#001234".toColor(),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-               Text(
-                "Visit Scheduled!",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: "#001234".toColor(),
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              // 🔹 Subtitle
-              const Text(
-                "Your visit has been successfully booked.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14.5,
-                  color: Colors.black87,
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // 🔹 Booking Summary Card
-              if (date != null || time != null)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: "#EEF5FF".toColor(),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    children: [
-
-                      if (date != null)
-                        _dialogInfoRow(Icons.calendar_today, "Date", date),
-
-                      if (time != null) ...[
-                        const SizedBox(height: 8),
-                        _dialogInfoRow(Icons.access_time, "Time Slot", time),
-                      ],
-                    ],
-                  ),
-                ),
-
-              const SizedBox(height: 20),
-
-              // 🔹 Info Message
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: "#001234".toColor().withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(Icons.info_outline,
-                        size: 18,
-                        color: "#001234".toColor()),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        "Our property advisor will contact you shortly to confirm your visit.",
-                        style: TextStyle(
-                          fontSize: 13.5,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 26),
-
-              // 🔹 Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: "#001234".toColor(),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    "Done",
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _dialogInfoRow(IconData icon, String title, String value) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: "#001234".toColor()),
-        const SizedBox(width: 8),
-        Text(
-          "$title:",
-          style: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 13.5,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 13.5,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-      ],
-    );
   }
 
   @override
@@ -495,43 +269,38 @@ class _Full_PropertyState extends State<Full_Property> {
                             fontWeight: FontWeight.bold)),
                     ElevatedButton(
                       onPressed: () async {
+
                         if (isBooked) {
+
                           if (bookingData != null) {
                             showVisitDetails(bookingData!);
                           }
+
                           return;
                         }
 
-                        final bookingDataSheet = await _showBookingBottomSheet();
+                        Navigator.push(
 
-                        if (bookingDataSheet == null) return;
+                          context,
 
-                        final propertyList = await _propertyFuture;
-                        if (propertyList.isEmpty) return;
+                          MaterialPageRoute(
 
-                        final property = propertyList.first;
+                            builder: (_) => PropertyVisitBookingPage(
 
-                        final prefs = await SharedPreferences.getInstance();
-                        final userId = prefs.getInt("id") ?? 0;
-                        final name = prefs.getString("name") ?? "";
-                        final number = prefs.getString("number") ?? "";
+                              propertyId: data.id.toString(),
 
-                        await bookSchedule(
-                          userId: userId.toString(),
-                          userName: name,
-                          phoneNumber: number,
-                          address: property.apartmentAddress,
-                          id: property.id.toString(),
-                          location: property.location,
-                          info: property.facility,
-                          furnished: property.furnished,
-                          bhk: property.bhk,
-                          type: property.typeOfProperty,
-                          fieldworkerName: property.fieldworkerName,
-                          fieldworkerNumber: property.fieldworkerNumber,
-                          visitingDate: bookingDataSheet["date"]!,
-                          visitingTime: bookingDataSheet["time"]!,
+                              bhk: data.bhk,
+
+                              propertyType: data.typeOfProperty,
+
+                              location: data.location,
+
+                            ),
+
+                          ),
+
                         );
+
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isBooked
@@ -541,13 +310,17 @@ class _Full_PropertyState extends State<Full_Property> {
                           borderRadius: BorderRadius.circular(40),
                         ),
                       ),
-                      child: Text(
-                        isBooked ? "View Details" : "Book Schedule",
-                        style: TextStyle(
-                          color: isBooked ?  "#001234".toColor() :   Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                        child: Text(
+                          isBooked
+                              ? "View Details"
+                              : "Book Property Visit",
+                          style: TextStyle(
+                            color: isBooked
+                                ? "#001234".toColor()
+                                : Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )
                     )
                   ],
                 ),
@@ -556,229 +329,6 @@ class _Full_PropertyState extends State<Full_Property> {
 
           }),
     );
-  }
-
-  Future<Map<String, String>?> _showBookingBottomSheet() async {
-    DateTime? selectedDate;
-    String? selectedSlot;
-    List<String> timeSlots = [
-      "09:00 AM - 11:00 AM",
-      "11:00 AM - 01:00 PM",
-      "02:00 PM - 04:00 PM",
-      "04:00 PM - 06:00 PM",
-      "06:00 PM - 08:00 PM",
-    ];
-
-    bool isSlotExpired(String slot) {
-      final now = DateTime.now();
-
-      // Only apply for today
-      if (selectedDate == null ||
-          DateFormat('yyyy-MM-dd').format(selectedDate!) !=
-              DateFormat('yyyy-MM-dd').format(now)) {
-        return false;
-      }
-
-      // Extract slot start time
-      final startTime = slot.split('-')[0].trim(); // "09:00 AM"
-
-      final parsedTime = DateFormat("hh:mm a").parse(startTime);
-
-      final slotDateTime = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        parsedTime.hour,
-        parsedTime.minute,
-      );
-
-      return slotDateTime.isBefore(now);
-    }
-
-    return await showModalBottomSheet<Map<String, String>>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(25)),
-              ),
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-
-                  // Drag handle
-                  Container(
-                    height: 5,
-                    width: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Text(
-                    "Schedule Property Visit",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: "#001234".toColor(),
-                    ),
-                  ),
-
-                  const SizedBox(height: 25),
-
-                  // DATE CARD
-                  _selectCard(
-                    icon: Icons.calendar_today,
-                    title: selectedDate == null
-                        ? "Select Visiting Date"
-                        : DateFormat('dd MMM yyyy').format(selectedDate!),
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime(2030),
-                        builder: (context, child) {
-                          return Theme(
-                            data: Theme.of(context).copyWith(
-                              colorScheme: ColorScheme.light(
-                                primary: "#001234".toColor(), // header background
-                                onPrimary: Colors.white,      // header text
-                                onSurface: Colors.black87,    // calendar text
-                              ),
-                              textButtonTheme: TextButtonThemeData(
-                                style: TextButton.styleFrom(
-                                  foregroundColor: "#001234".toColor(),
-                                ),
-                              ),
-                            ),
-                            child: child!,
-                          );
-                        },
-                      );
-                      if (picked != null) {
-                        setModalState(() => selectedDate = picked);
-                      }
-                    },
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Select Time Slot",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: "#001234".toColor(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: timeSlots.map((slot) {
-                          final isSelected = selectedSlot == slot;
-
-                          final isExpired = isSlotExpired(slot);
-
-                          return GestureDetector(
-                            onTap: isExpired
-                                ? null
-                                : () {
-                              setModalState(() {
-                                selectedSlot = slot;
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: isExpired
-                                    ? Colors.grey.shade300
-                                    : isSelected
-                                    ? "#001234".toColor()
-                                    : "#EEF5FF".toColor(),
-
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child:
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.access_time,
-                                      size: 16,
-                                      color: isSelected ? Colors.white : Colors.black54),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    slot,
-                                    style: TextStyle(
-                                      color: isSelected ? Colors.white : Colors.black87,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: "#001234".toColor(),
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    onPressed: () {
-                      if (selectedDate == null || selectedSlot  == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text("Please select date and time")),
-                        );
-                        return;
-                      }
-
-                      Navigator.pop(context, {
-                        "date":
-                        DateFormat('yyyy-MM-dd').format(selectedDate!),
-                        "time": selectedSlot!,
-                      });
-                    },
-                    child: const Text(
-                      "Confirm Booking",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-
-                  const SizedBox(height: 15),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-
   }
 
   void showVisitDetails(Map bookingData) {
@@ -1130,63 +680,6 @@ class _Full_PropertyState extends State<Full_Property> {
 
 
       ],
-    );
-  }
-
-  Widget _selectCard({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-        decoration: BoxDecoration(
-          color: "#EEF5FF".toColor(),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: "#001234".toColor().withOpacity(0.08),
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              height: 38,
-              width: 38,
-              decoration: BoxDecoration(
-                color: "#001234".toColor().withOpacity(0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                size: 18,
-                color: "#001234".toColor(),
-              ),
-            ),
-
-            const SizedBox(width: 14),
-
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16,
-              color: Colors.black38,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
