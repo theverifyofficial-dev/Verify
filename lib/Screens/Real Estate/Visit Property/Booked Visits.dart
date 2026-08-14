@@ -29,6 +29,45 @@ class _PropertyVisitHistoryPageState
     loadVisits();
   }
 
+  List<MapEntry<String, String>> _parseRequirements(String raw) {
+    const labels = [
+      "BHK",
+      "Property Type",
+      "Location",
+      "Floor",
+      "Buy/Rent",
+      "Lift Required",
+      "Parking Required",
+      "Notes",
+    ];
+
+    final Map<String, String> result = {};
+
+    for (int i = 0; i < labels.length; i++) {
+      final label = labels[i];
+      final startIndex = raw.indexOf("$label: ");
+      if (startIndex == -1) continue;
+
+      final valueStart = startIndex + label.length + 2;
+
+      int valueEnd = raw.length;
+      for (int j = i + 1; j < labels.length; j++) {
+        final nextIndex = raw.indexOf("${labels[j]}: ", valueStart);
+        if (nextIndex != -1) {
+          valueEnd = nextIndex - 2; // trim trailing ", "
+          break;
+        }
+      }
+
+      final value = raw.substring(valueStart, valueEnd).trim();
+      if (value.isNotEmpty) {
+        result[label] = value;
+      }
+    }
+
+    return result.entries.toList();
+  }
+
   Future<void> loadVisits() async {
     setState(() {
       loading = true;
@@ -823,77 +862,61 @@ class _PropertyVisitHistoryPageState
                   const SizedBox(height: 20),
 
                   if (visit.requirements.isNotEmpty)
+                    Builder(
+                      builder: (_) {
+                        final parsed = _parseRequirements(visit.requirements);
 
-                    Container(
-
-                      width: double.infinity,
-
-                      padding: const EdgeInsets.all(18),
-
-                      decoration: BoxDecoration(
-
-                        color: Colors.orange.shade50,
-
-                        borderRadius: BorderRadius.circular(18),
-
-                      ),
-
-                      child: Column(
-
-                        crossAxisAlignment: CrossAxisAlignment.start,
-
-                        children: [
-
-                          const Row(
-
+                        return Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-
-                              Icon(
-
-                                Icons.notes,
-
-                                color: Colors.orange,
-
+                              const Row(
+                                children: [
+                                  Icon(Icons.notes, color: Colors.orange),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Requirements",
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  ),
+                                ],
                               ),
-
-                              SizedBox(width: 8),
-
-                              Text(
-
-                                "Requirements",
-
-                                style: TextStyle(
-
-                                  fontWeight: FontWeight.bold,
-
-                                  fontSize: 16,
-
+                              const SizedBox(height: 14),
+                              if (parsed.isEmpty)
+                                Text(visit.requirements, style: const TextStyle(height: 1.5))
+                              else
+                                ...parsed.map(
+                                      (e) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          width: 130,
+                                          child: Text(
+                                            e.key,
+                                            style: const TextStyle(fontWeight: FontWeight.w600),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            e.value,
+                                            style: const TextStyle(color: Colors.black87),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-
-                              ),
-
                             ],
-
                           ),
-
-                          const SizedBox(height: 12),
-
-                          Text(
-
-                            visit.requirements,
-
-                            style: const TextStyle(
-
-                              height: 1.5,
-
-                            ),
-
-                          ),
-
-                        ],
-
-                      ),
-
+                        );
+                      },
                     ),
 
                   const SizedBox(height: 20),

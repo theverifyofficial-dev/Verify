@@ -1,11 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../custom_widget/back_button.dart';
 import '../../../model/Calculate_model.dart';
 import '../../../utilities/hex_color.dart';
@@ -16,6 +14,7 @@ class PropertyVisitBookingPage extends StatefulWidget {
   final String bhk;
   final String propertyType;
   final String location;
+  final String name;
 
   const PropertyVisitBookingPage({
     super.key,
@@ -23,6 +22,7 @@ class PropertyVisitBookingPage extends StatefulWidget {
     required this.bhk,
     required this.propertyType,
     required this.location,
+    required this.name,
   });
 
   @override
@@ -65,6 +65,17 @@ class _PropertyVisitBookingPageState
 
   bool paymentLoading = false;
 
+  final floorController = TextEditingController();
+  final familyMemberController = TextEditingController();
+  final vichleNoController = TextEditingController();
+
+  String? selectedLift;              // "Yes" / "No"
+  String? selectedParking;           // "Yes" / "No"
+  String? selectedBuyRent;           // "Buy" / "Rent"
+  String? selectedFamilyStructure;   // "Nuclear" / "Joint"
+  String? selectedReligion;
+  DateTime? selectedShiftingDate;
+
   @override
   void initState() {
     super.initState();
@@ -89,6 +100,21 @@ class _PropertyVisitBookingPageState
       Razorpay.EVENT_EXTERNAL_WALLET,
       _handleExternalWallet,
     );
+  }
+
+  String _buildRequirementString() {
+    final parts = [
+      "BHK: ${widget.bhk}",
+      "Property Type: ${widget.propertyType}",
+      "Location: ${locationController.text}",
+      "Floor: ${floorController.text}",
+      "Buy/Rent: ${selectedBuyRent ?? ''}",
+      "Lift Required: ${selectedLift ?? ''}",
+      "Parking Required: ${selectedParking ?? ''}",
+      if (requirementController.text.trim().isNotEmpty)
+        "Notes: ${requirementController.text.trim()}",
+    ];
+    return parts.join(", ");
   }
 
   Future<void> loadCalculation() async {
@@ -148,8 +174,6 @@ class _PropertyVisitBookingPageState
 
           "property_id": widget.propertyId,
 
-          "bhk": widget.bhk,
-
           "visit_fee": calculation!.visitFee.toString(),
 
           "gst": calculation!.gst.toString(),
@@ -167,8 +191,15 @@ class _PropertyVisitBookingPageState
 
           "visit_time": selectedSlot!,
 
-          "requirements": requirementController.text,
-
+          "requirements": _buildRequirementString(),
+          "family_structure": selectedFamilyStructure ?? "",
+          "family_member": familyMemberController.text,
+          "religion": selectedReligion ?? "",
+          "feild_workar_name": widget.name,
+          "shifting_date": selectedShiftingDate != null
+              ? DateFormat("yyyy-MM-dd").format(selectedShiftingDate!)
+              : "",
+          "vichle_no": vichleNoController.text,
         },
 
       );
@@ -742,6 +773,9 @@ class _PropertyVisitBookingPageState
             _requirementSection(),
 
             const SizedBox(height: 20),
+            _additionalDetailsSection(),   // <-- missing, add this
+
+            const SizedBox(height: 20),
 
             _dateSection(),
 
@@ -975,7 +1009,7 @@ class _PropertyVisitBookingPageState
 
             decoration: InputDecoration(
 
-              hintText: "Example : 75,00,000",
+              hintText: "Enter your budget",
 
               prefixIcon: const Icon(Icons.currency_rupee),
 
@@ -1100,19 +1134,9 @@ class _PropertyVisitBookingPageState
         children: [
 
           const Text(
-
-            "Additional Requirements",
-
-            style: TextStyle(
-
-              fontWeight: FontWeight.bold,
-
-              fontSize: 17,
-
-            ),
-
+            "Any Other Notes",   // was "Additional Requirements"
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
           ),
-
           const SizedBox(height: 15),
 
           TextField(
@@ -1124,7 +1148,7 @@ class _PropertyVisitBookingPageState
             decoration: InputDecoration(
 
               hintText:
-              "Parking, Lift, Near Metro, Corner Flat...",
+              "Near Metro, Corner Flat, West Facing...",
 
               hintStyle: TextStyle(color: Colors.grey),
 
@@ -1152,6 +1176,143 @@ class _PropertyVisitBookingPageState
 
     );
 
+  }
+
+  Widget _additionalDetailsSection() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Additional Details",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+          ),
+          const SizedBox(height: 15),
+          TextField(
+            controller: floorController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: "Preferred Floor",
+              filled: true,
+              fillColor: "#EEF5FF".toColor(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _dropdownField(
+            label: "Buy / Rent",
+            value: selectedBuyRent,
+            options: const ["Buy", "Rent"],
+            onChanged: (v) => setState(() => selectedBuyRent = v),
+          ),
+          const SizedBox(height: 12),
+          _dropdownField(
+            label: "Lift Required",
+            value: selectedLift,
+            options: const ["Yes", "No"],
+            onChanged: (v) => setState(() => selectedLift = v),
+          ),
+          const SizedBox(height: 12),
+          _dropdownField(
+            label: "Parking Required",
+            value: selectedParking,
+            options: const ["Yes", "No"],
+            onChanged: (v) => setState(() => selectedParking = v),
+          ),
+          const SizedBox(height: 12),
+          _dropdownField(
+            label: "Family Structure",
+            value: selectedFamilyStructure,
+            options: const ["Nuclear", "Joint"],
+            onChanged: (v) => setState(() => selectedFamilyStructure = v),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: familyMemberController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: "No. of Family Members",
+              filled: true,
+              fillColor: "#EEF5FF".toColor(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _dropdownField(
+            label: "Religion",
+            value: selectedReligion,
+            options: const ["Hindu", "Muslim", "Sikh", "Christian", "Other"],
+            onChanged: (v) => setState(() => selectedReligion = v),
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime.now(),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
+              );
+              if (picked != null) {
+                setState(() => selectedShiftingDate = picked);
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              decoration: BoxDecoration(
+                color: "#EEF5FF".toColor(),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.event, color: "#001234".toColor()),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      selectedShiftingDate == null
+                          ? "Preferred Shifting Date"
+                          : DateFormat("dd MMMM yyyy").format(selectedShiftingDate!),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: selectedShiftingDate == null ? Colors.grey : Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios, size: 16),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: vichleNoController,
+            textCapitalization: TextCapitalization.characters,
+            decoration: InputDecoration(
+              hintText: "Vehicle Number (if any)",
+              filled: true,
+              fillColor: "#EEF5FF".toColor(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _infoTile(
@@ -1877,6 +2038,46 @@ class _PropertyVisitBookingPageState
 
     }
 
+    if (floorController.text.trim().isEmpty) {
+      _showMessage("Please enter preferred floor.");
+      return false;
+    }
+
+    if (selectedBuyRent == null) {
+      _showMessage("Please select Buy or Rent.");
+      return false;
+    }
+
+    if (selectedLift == null) {
+      _showMessage("Please select lift Required.");
+      return false;
+    }
+
+    if (selectedParking == null) {
+      _showMessage("Please select parking Required.");
+      return false;
+    }
+
+    if (selectedFamilyStructure == null) {
+      _showMessage("Please select family structure.");
+      return false;
+    }
+
+    if (familyMemberController.text.trim().isEmpty) {
+      _showMessage("Please enter number of family members.");
+      return false;
+    }
+
+    if (selectedReligion == null) {
+      _showMessage("Please select religion.");
+      return false;
+    }
+
+    if (selectedShiftingDate == null) {
+      _showMessage("Please select preferred shifting date.");
+      return false;
+    }
+
     return true;
 
   }
@@ -2051,6 +2252,30 @@ class _PropertyVisitBookingPageState
 
     );
 
+  }
+
+  Widget _dropdownField({
+    required String label,
+    required String? value,
+    required List<String> options,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      items: options
+          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+          .toList(),
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: "#EEF5FF".toColor(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
   }
 
 }

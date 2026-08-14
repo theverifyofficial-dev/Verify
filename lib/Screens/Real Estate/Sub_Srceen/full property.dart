@@ -117,7 +117,7 @@ class _Full_PropertyState extends State<Full_Property> {
 
   Future<void> checkIfBooked(String propertyId, String userId) async {
     final url = Uri.parse(
-        "https://verifyrealestateandservices.in/Second%20PHP%20FILE/book_shedual/show_api_for_property_id_and_user_id.php?property_id=$propertyId&user_ids=$userId"
+        "https://verifyrealestateandservices.in/Second%20PHP%20FILE/book_shedual/show_api_for_property_id_and_user_id.php?property_id=$propertyId&user_id=$userId"
     );
 
     final response = await http.get(url);
@@ -294,6 +294,8 @@ class _Full_PropertyState extends State<Full_Property> {
                               propertyType: data.typeOfProperty,
 
                               location: data.location,
+
+                              name: data.fieldworkerName,
 
                             ),
 
