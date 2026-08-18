@@ -287,15 +287,11 @@ class _Full_PropertyState extends State<Full_Property> {
 
                             builder: (_) => PropertyVisitBookingPage(
 
-                              propertyId: data.id.toString(),
-
                               bhk: data.bhk,
 
                               propertyType: data.typeOfProperty,
 
                               location: data.location,
-
-                              name: data.fieldworkerName,
 
                             ),
 

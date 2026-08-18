@@ -35,9 +35,11 @@ class _PropertyVisitHistoryPageState
       "Property Type",
       "Location",
       "Floor",
+      "Furnishing",
       "Buy/Rent",
       "Lift Required",
       "Parking Required",
+      "Balcony Required",
       "Notes",
     ];
 
@@ -66,6 +68,12 @@ class _PropertyVisitHistoryPageState
     }
 
     return result.entries.toList();
+  }
+
+  String _extractBhk(String requirements) {
+    final parsed = _parseRequirements(requirements);
+    final match = parsed.where((e) => e.key == "BHK").toList();
+    return match.isNotEmpty ? match.first.value : "Property Visit";
   }
 
   Future<void> loadVisits() async {
@@ -267,7 +275,6 @@ class _PropertyVisitHistoryPageState
 
   Widget _visitCard(PropertyVisitModel visit) {
 
-
     return InkWell(
 
       borderRadius: BorderRadius.circular(22),
@@ -282,23 +289,14 @@ class _PropertyVisitHistoryPageState
 
         decoration: BoxDecoration(
           color: Colors.white,
-
           borderRadius: BorderRadius.circular(22),
-
           boxShadow: [
-
             BoxShadow(
-
               color: Colors.black.withOpacity(.05),
-
               blurRadius: 10,
-
               offset: const Offset(0, 5),
-
             )
-
           ],
-
         ),
 
         child: Column(
@@ -357,16 +355,12 @@ class _PropertyVisitHistoryPageState
 
                         Text(
 
-                          visit.bhk,
+                          _extractBhk(visit.requirements),
 
                           style: const TextStyle(
-
                             color: Colors.white,
-
                             fontWeight: FontWeight.bold,
-
                             fontSize: 18,
-
                           ),
 
                         ),
@@ -375,12 +369,12 @@ class _PropertyVisitHistoryPageState
 
                         Text(
 
-                          "Property ID : ${visit.propertyId}",
+                          visit.fieldWorkerName.isNotEmpty
+                              ? "Field Worker : ${visit.fieldWorkerName}"
+                              : "Booking #${visit.id}",
 
                           style: const TextStyle(
-
                             color: Colors.white70,
-
                           ),
 
                         ),
@@ -394,33 +388,21 @@ class _PropertyVisitHistoryPageState
                   Container(
 
                     padding: const EdgeInsets.symmetric(
-
                       horizontal: 14,
-
                       vertical: 8,
-
                     ),
 
                     decoration: BoxDecoration(
-
                       color: statusChipColor(visit.visitingStatus),
-
                       borderRadius: BorderRadius.circular(30),
-
                     ),
 
                     child: Text(
-
                       visit.visitingStatus,
-
                       style: const TextStyle(
-
                         color: Colors.white,
-
                         fontWeight: FontWeight.bold,
-
                       ),
-
                     ),
 
                   ),
@@ -440,37 +422,25 @@ class _PropertyVisitHistoryPageState
                 children: [
 
                   _row(
-
                     Icons.calendar_today,
-
-                    "Visit Date",
-
-                    formatDate(visit.visitDate),
-
+                    "Shifting Date",
+                    formatDate(visit.shiftingDate),
                   ),
 
                   const SizedBox(height: 12),
 
                   _row(
-
-                    Icons.schedule,
-
-                    "Time",
-
-                    visit.visitTime,
-
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  _row(
-
                     Icons.location_on,
-
                     "Location",
-
                     visit.preferredLocation,
+                  ),
 
+                  const SizedBox(height: 12),
+
+                  _row(
+                    Icons.people_outline,
+                    "Family",
+                    "${visit.familyStructure} • ${visit.familyMember} members",
                   ),
 
                   const Divider(height: 28),
@@ -489,15 +459,12 @@ class _PropertyVisitHistoryPageState
                         ),
                         child: Row(
                           children: [
-
                             Icon(
                               Icons.credit_card_rounded,
                               color: statusChipColor(visit.paymentStatus),
                               size: 16,
                             ),
-
                             const SizedBox(width: 6),
-
                             Text(
                               visit.paymentStatus,
                               style: TextStyle(
@@ -505,7 +472,6 @@ class _PropertyVisitHistoryPageState
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-
                           ],
                         ),
                       ),
@@ -682,20 +648,15 @@ class _PropertyVisitHistoryPageState
                   const SizedBox(height: 18),
 
                   Text(
-
-                    visit.bhk,
-
+                    _extractBhk(visit.requirements),
                     style: const TextStyle(
-
                       fontSize: 24,
-
                       fontWeight: FontWeight.bold,
-
                     ),
-
                   ),
 
                   const SizedBox(height: 5),
+
 
                   Text(
 
@@ -718,139 +679,101 @@ class _PropertyVisitHistoryPageState
                     padding: const EdgeInsets.all(18),
 
                     decoration: BoxDecoration(
-
                       color: "#EEF5FF".toColor(),
-
                       borderRadius: BorderRadius.circular(20),
-
                     ),
 
                     child: Column(
 
                       children: [
 
-                        _dialogRow(
-
+                        _dialogRowIfPresent(
                           Icons.location_on,
-
                           "Preferred Location",
-
                           visit.preferredLocation,
-
                         ),
 
-                        const SizedBox(height: 15),
-
-                        _dialogRow(
-
-                          Icons.calendar_today,
-
-                          "Visit Date",
-
-                          formatDate(visit.visitDate),
-
+                        _dialogRowIfPresent(
+                          Icons.event,
+                          "Shifting Date",
+                          formatDate(visit.shiftingDate),
                         ),
 
-                        const SizedBox(height: 15),
-
-                        _dialogRow(
-
-                          Icons.schedule,
-
-                          "Visit Time",
-
-                          visit.visitTime,
-
+                        _dialogRowIfPresent(
+                          Icons.people_outline,
+                          "Family Structure",
+                          visit.familyStructure,
                         ),
 
-                        const SizedBox(height: 15),
+                        _dialogRowIfPresent(
+                          Icons.groups_outlined,
+                          "Family Members",
+                          visit.familyMember,
+                        ),
 
-                        _dialogRow(
+                        _dialogRowIfPresent(
+                          Icons.badge_outlined,
+                          "Field Worker",
+                          visit.fieldWorkerName,
+                        ),
 
+                        _dialogRowIfPresent(
+                          Icons.two_wheeler_outlined,
+                          "Vehicle Type",
+                          visit.vehicleType,
+                        ),
+
+                        _dialogRowIfPresent(
                           Icons.wallet,
-
                           "Budget",
-
                           "₹ ${visit.budget}",
-
                         ),
 
                         const SizedBox(height: 15),
 
                         _dialogRow(
-
                           Icons.payments,
-
                           "Visit Fee",
-
                           "₹ ${visit.visitFee}",
-
                         ),
 
                         const SizedBox(height: 15),
 
                         _dialogRow(
-
                           Icons.receipt_long,
-
                           "GST",
-
                           "₹ ${visit.gst}",
-
                         ),
 
                         const SizedBox(height: 15),
 
                         _dialogRow(
-
                           Icons.account_balance_wallet,
-
                           "Gateway Charges",
-
                           "₹ ${visit.gatewayFee}",
-
                         ),
 
                         const Divider(height: 30),
 
                         Row(
-
                           children: [
-
                             const Text(
-
                               "Total Paid",
-
                               style: TextStyle(
-
                                 fontWeight: FontWeight.bold,
-
                                 fontSize: 17,
-
                               ),
-
                             ),
-
                             const Spacer(),
-
                             Text(
-
                               "₹ ${visit.total}",
-
                               style: TextStyle(
-
                                 fontWeight: FontWeight.bold,
-
                                 fontSize: 20,
-
                                 color: Colors.green.shade700,
-
                               ),
-
                             ),
-
                           ],
-
                         ),
 
                       ],
@@ -858,13 +781,77 @@ class _PropertyVisitHistoryPageState
                     ),
 
                   ),
-
                   const SizedBox(height: 20),
 
+                  // if (visit.requirements.isNotEmpty)
+                  //   Builder(
+                  //     builder: (_) {
+                  //       final parsed = _parseRequirements(visit.requirements);
+                  //
+                  //       return Container(
+                  //         width: double.infinity,
+                  //         padding: const EdgeInsets.all(18),
+                  //         decoration: BoxDecoration(
+                  //           color: Colors.orange.shade50,
+                  //           borderRadius: BorderRadius.circular(18),
+                  //         ),
+                  //         child: Column(
+                  //           crossAxisAlignment: CrossAxisAlignment.start,
+                  //           children: [
+                  //             const Row(
+                  //               children: [
+                  //                 Icon(Icons.notes, color: Colors.orange),
+                  //                 SizedBox(width: 8),
+                  //                 Text(
+                  //                   "Requirements",
+                  //                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  //                 ),
+                  //               ],
+                  //             ),
+                  //             const SizedBox(height: 14),
+                  //             if (parsed.isEmpty)
+                  //               Text(visit.requirements, style: const TextStyle(height: 1.5))
+                  //             else
+                  //               ...parsed.map(
+                  //                     (e) => Padding(
+                  //                   padding: const EdgeInsets.only(bottom: 10),
+                  //                   child: Row(
+                  //                     crossAxisAlignment: CrossAxisAlignment.start,
+                  //                     children: [
+                  //                       SizedBox(
+                  //                         width: 130,
+                  //                         child: Text(
+                  //                           e.key,
+                  //                           style: const TextStyle(fontWeight: FontWeight.w600),
+                  //                         ),
+                  //                       ),
+                  //                       Expanded(
+                  //                         child: Text(
+                  //                           e.value,
+                  //                           style: const TextStyle(color: Colors.black87),
+                  //                         ),
+                  //                       ),
+                  //                     ],
+                  //                   ),
+                  //                 ),
+                  //               ),
+                  //           ],
+                  //         ),
+                  //       );
+                  //     },
+                  //   ),
+
+                  // NEW requirements card — shows only labels that actually have a value.
                   if (visit.requirements.isNotEmpty)
                     Builder(
                       builder: (_) {
-                        final parsed = _parseRequirements(visit.requirements);
+                        final parsed = _parseRequirements(visit.requirements)
+                            .where((e) => e.value.trim().isNotEmpty)
+                            .toList();
+
+                        if (parsed.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
 
                         return Container(
                           width: double.infinity,
@@ -887,32 +874,29 @@ class _PropertyVisitHistoryPageState
                                 ],
                               ),
                               const SizedBox(height: 14),
-                              if (parsed.isEmpty)
-                                Text(visit.requirements, style: const TextStyle(height: 1.5))
-                              else
-                                ...parsed.map(
-                                      (e) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          width: 130,
-                                          child: Text(
-                                            e.key,
-                                            style: const TextStyle(fontWeight: FontWeight.w600),
-                                          ),
+                              ...parsed.map(
+                                    (e) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        width: 130,
+                                        child: Text(
+                                          e.key,
+                                          style: const TextStyle(fontWeight: FontWeight.w600),
                                         ),
-                                        Expanded(
-                                          child: Text(
-                                            e.value,
-                                            style: const TextStyle(color: Colors.black87),
-                                          ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          e.value,
+                                          style: const TextStyle(color: Colors.black87),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
+                              ),
                             ],
                           ),
                         );
@@ -1033,6 +1017,16 @@ class _PropertyVisitHistoryPageState
         ));
       },
 
+    );
+  }
+
+  Widget _dialogRowIfPresent(IconData icon, String title, String value) {
+    if (value.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: _dialogRow(icon, title, value),
     );
   }
 
