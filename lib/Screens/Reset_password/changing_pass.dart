@@ -44,8 +44,6 @@ class _PasswordState extends State<Password> {
         },
       ).timeout(const Duration(seconds: 10));
 
-      print(response.body); // 🔥 always log during testing
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 

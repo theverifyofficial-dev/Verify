@@ -10,13 +10,7 @@ async {
   final prefs = await SharedPreferences.getInstance();
   final userId = prefs.getInt('id');
 
-  print("🟡 Wishlist toggle tapped");
-  print("➡️ Property ID: $pId");
-  print("➡️ User ID: $userId");
-  print("➡️ Current state: $isWishlisted");
-
   if (userId == null) {
-    print("❌ User not logged in");
     return false;
   }
 
@@ -30,10 +24,6 @@ async {
     "user_id": userId.toString(),
     "property_id": pId.toString(),
   });
-
-  print("📡 API URL: $url");
-  print("📡 Status: ${response.statusCode}");
-  print("📡 Body: ${response.body}");
 
   return response.statusCode == 200;
 }
@@ -74,9 +64,6 @@ class _WishlistButtonState extends State<WishlistButton> {
 
     if (success) {
       setState(() => isWishlisted = !isWishlisted);
-      print("❤️ UI updated → $isWishlisted");
-    } else {
-      print("❌ Wishlist toggle failed");
     }
 
     setState(() => loading = false);

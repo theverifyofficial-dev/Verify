@@ -23,21 +23,10 @@ class _ForgetState extends State<Forget> {
   Future<void> checkNumberAndSendOtp(String number) async {
     setState(() => _isLoading = true);
 
-    if (number == "9999999999") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Otp(
-            number: number,
-            sessionId: "demo_session", // fake
-          ),
-        ),
-      );
-      return;
-    }
-
     try {
-      final apiKey = "ceabde09-483f-11f0-a562-0200cd936042";
+      const apiKey = String.fromEnvironment('TWO_FACTOR_API_KEY');
+
+      print(apiKey);
 
       final url = Uri.parse(
           'https://verifyrealestateandservices.in/WebService4.asmx/CheckMobileNumber?FNumber=$number');
@@ -81,7 +70,6 @@ class _ForgetState extends State<Forget> {
               showError("Failed to send OTP");
             }
           } else {
-            // ❌ Number not found
             showError("Mobile number not registered");
           }
         } else {
@@ -140,7 +128,7 @@ class _ForgetState extends State<Forget> {
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Poppins',
-                      color: Theme.of(context).textTheme.bodyMedium!.color,
+                      color: Colors.white,
                     ),
                   ),
 
@@ -247,6 +235,7 @@ class _ForgetState extends State<Forget> {
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
+                          color: Colors.black
                         ),
                       ),
                     ),

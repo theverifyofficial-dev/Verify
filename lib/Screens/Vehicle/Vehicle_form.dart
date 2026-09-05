@@ -138,8 +138,6 @@ class _RegisterVehiclePageState extends State<RegisterVehiclePage> {
         ),
       );
 
-      print(request.fields);
-
       /// 🔥 SEND
       final streamedResponse =
       await request.send();
@@ -148,8 +146,6 @@ class _RegisterVehiclePageState extends State<RegisterVehiclePage> {
       await http.Response.fromStream(
         streamedResponse,
       );
-
-      print(response.body);
 
       /// 🔥 SUCCESS
       if (response.statusCode == 200 &&

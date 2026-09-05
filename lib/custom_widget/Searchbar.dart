@@ -58,10 +58,7 @@ class _NeumorphicSearchBarState extends State<NeumorphicSearchBar>
     }
 
     if (!_isListening) {
-      bool available = await _speech.initialize(
-        onStatus: (val) => print('STATUS: $val'),
-        onError: (val) => print('ERROR: $val'),
-      );
+      bool available = await _speech.initialize();
 
       if (available) {
         setState(() => _isListening = true);
@@ -205,5 +202,4 @@ class _NeumorphicSearchBarState extends State<NeumorphicSearchBar>
       },
     );
   }
-
 }

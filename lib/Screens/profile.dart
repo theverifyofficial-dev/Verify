@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -8,7 +9,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:Verify/Screens/Loginpage.dart';
 import 'package:Verify/custom_widget/Paths.dart';
-
+import 'package:intl/intl.dart';
+import '../../utilities/membership_helper.dart';   // adjust path to where you saved it
+import '../utilities/hex_color.dart';
+import 'Membership/membership_page.dart';
 import 'Real Estate/Visit Property/Booked Visits.dart';
 import 'Real Estate/wishlist.dart';
 import 'Services/My_service.dart';
@@ -32,8 +36,7 @@ class Profile extends StatefulWidget {
   State<Profile> createState() => _ProfileState();
 }
 
-class _ProfileState extends State<Profile> {
-
+class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   String name = '';
   String email = '';
   String number = '';
@@ -42,6 +45,9 @@ class _ProfileState extends State<Profile> {
   final ImagePicker _picker = ImagePicker();
   String? _profileImageUrl;
   bool showMoreSocialLinks = false;
+  bool _isMember = false;
+  DateTime? _membershipExpiry;
+  late AnimationController _memberCtaController;
 
   final List<SocialLink> primarySocialLinks = [
     SocialLink(
@@ -86,7 +92,17 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
+    _memberCtaController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..repeat();
     _loadUserData();
+  }
+
+  @override
+  void dispose() {
+    _memberCtaController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickImage() async {
@@ -160,6 +176,8 @@ class _ProfileState extends State<Profile> {
 
     final imageUrl = sharedPref.getString('profile_image_url');
 
+    final memberActive = await MembershipHelper.isActive();
+    final memberExpiry = await MembershipHelper.expiryDate();
 
     setState(() {
       name = sharedPref.getString('name') ?? '';
@@ -167,8 +185,11 @@ class _ProfileState extends State<Profile> {
       number = sharedPref.getString('number') ?? '';
       id = sharedPref.getInt('id') ?? 0;
       _profileImageUrl = imageUrl;
+      _isMember = memberActive;
+      _membershipExpiry = memberExpiry;
     });
   }
+
   Future<void> _logout() async {
     final sharedPref = await SharedPreferences.getInstance();
     await sharedPref.clear();
@@ -217,6 +238,140 @@ class _ProfileState extends State<Profile> {
           value,
           style: const TextStyle(
               fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black),
+        ),
+      ),
+    );
+  }
+
+  void _showMembershipDialog() {
+    final benefits = [
+      "Unlimited free property visit bookings for 1 year",
+      "No visit fee on every booking",
+      "Priority scheduling with our field advisors",
+    ];
+
+    final expiryText = _membershipExpiry != null
+        ? DateFormat("dd MMMM yyyy").format(_membershipExpiry!)
+        : "—";
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
+              Center(
+                child: Container(
+                  width: 74,
+                  height: 74,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFFD86B), Color(0xFFB8860B)],
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.workspace_premium_rounded,
+                    color: Colors.white,
+                    size: 38,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              const Center(
+                child: Text(
+                  "Active Membership",
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              Center(
+                child: Text(
+                  "Valid till $expiryText",
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Your Benefits",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.5,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ...benefits.map(
+                          (b) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.check_circle, size: 17, color: Colors.green.shade600),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                b,
+                                style: const TextStyle(fontSize: 13.5, height: 1.4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade900,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Text(
+                    "Close",
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -409,6 +564,11 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+
+    final expiryText = _membershipExpiry != null
+        ? DateFormat("dd MMMM yyyy").format(_membershipExpiry!)
+        : "—";
+
     return Scaffold(
       backgroundColor: Colors.blue.shade50,
       body: Container(
@@ -427,40 +587,59 @@ class _ProfileState extends State<Profile> {
                 child: Column(
                   children: [
                     Stack(
-                      alignment: Alignment.bottomRight,
+                      alignment: Alignment.center,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            if (_profileImage != null) {
-                              showDialog(
-                                context: context,
-                                builder: (_) => Dialog(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.file(_profileImage!, fit: BoxFit.cover),
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          child: CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Colors.white,
-                            child: ClipOval(
-                              child: (_profileImage != null)
-                                  ? Image.file(_profileImage!, fit: BoxFit.cover, width: 100, height: 100)
-                                  : (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
-                                  ? Image.network(
-                                _profileImageUrl!,
-                                fit: BoxFit.cover,
-                                width: 100,
-                                height: 100,
-                                errorBuilder: (_, __, ___) => Image.asset(AppImages.profile),
-                              )
-                                  : Image.asset(AppImages.profile),
+
+                        // Glorified ring — only shown for active members
+                        if (_isMember)
+                          Container(
+                            width: 112,
+                            height: 112,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [Color(0xFFFFD86B), Color(0xFFB8860B)],
+                              ),
                             ),
-                          )
+                          ),
+
+                        Padding(
+                          padding: EdgeInsets.all(_isMember ? 6 : 0),
+                          child: GestureDetector(
+                            onTap: () {
+                              if (_profileImage != null) {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => Dialog(
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.file(_profileImage!, fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                            child: CircleAvatar(
+                              radius: 50,
+                              backgroundColor: Colors.white,
+                              child: ClipOval(
+                                child: (_profileImage != null)
+                                    ? Image.file(_profileImage!, fit: BoxFit.cover, width: 100, height: 100)
+                                    : (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
+                                    ? Image.network(
+                                  _profileImageUrl!,
+                                  fit: BoxFit.cover,
+                                  width: 100,
+                                  height: 100,
+                                  errorBuilder: (_, __, ___) => Image.asset(AppImages.profile),
+                                )
+                                    : Image.asset(AppImages.profile),
+                              ),
+                            ),
+                          ),
                         ),
+
+                        // Add-photo icon — bottom-right corner
                         Positioned(
                           bottom: 0,
                           right: 0,
@@ -473,19 +652,76 @@ class _ProfileState extends State<Profile> {
                             ),
                           ),
                         ),
+
+                        // Membership badge — top-right corner, only for members
+                        if (_isMember)
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: GestureDetector(
+                              onTap: _showMembershipDialog,
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFFFFD86B), Color(0xFFB8860B)],
+                                  ),
+                                  border: Border.all(color: Colors.white, width: 2),
+                                ),
+                                child: const Icon(
+                                  Icons.workspace_premium_rounded,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      name,
-                      style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          name,
+                          style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 6),
                     Text("ID: $id",
                         style: const TextStyle(color: Colors.black54)),
+
+                    if (_isMember) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFFD86B), Color(0xFFB8860B)],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "MEMBER Valid till $expiryText",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                    ],
+
+                    if (!_isMember) _becomeMemberCard(),
                   ],
                 ),
               ),
@@ -666,6 +902,149 @@ class _ProfileState extends State<Profile> {
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: Colors.black87,
+        ),
+      ),
+    );
+  }
+
+  Widget _becomeMemberCard() {
+    return GestureDetector(
+      onTap: () async {
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MembershipPurchasePage()),
+        );
+        if (result == true) {
+          _loadUserData(); // refresh membership status after purchase
+        }
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          margin: const EdgeInsets.only(top: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF001234), Color(0xFF173B74)],
+            ),
+          ),
+          child: Stack(
+            children: [
+              Row(
+                children: [
+                  AnimatedBuilder(
+                    animation: _memberCtaController,
+                    builder: (context, child) {
+                      final t = _memberCtaController.value;
+                      final offsetY = math.sin(t * 2 * math.pi) * 2.5;
+                      return Transform.translate(offset: Offset(0, offsetY), child: child);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFFD86B), Color(0xFFB8860B)],
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.workspace_premium_rounded,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Become a Member",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          "Unlock free property visits for a year",
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.75),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Join",
+                          style: TextStyle(
+                            color: "#001234".toColor(),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(width: 3),
+                        Icon(Icons.arrow_forward_rounded, color: "#001234".toColor(), size: 13),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              // shimmer sweep, same low-key style as the Book My Visit card
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: ClipRect(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final width = constraints.maxWidth;
+                        final height = constraints.maxHeight;
+                        return AnimatedBuilder(
+                          animation: _memberCtaController,
+                          builder: (context, child) {
+                            final dx = (_memberCtaController.value * 1.6 - 0.4) * width;
+                            return Transform.translate(
+                              offset: Offset(dx, 0),
+                              child: Transform.rotate(
+                                angle: -0.4,
+                                child: Container(
+                                  width: width * 0.18,
+                                  height: height * 2.2,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                      colors: [
+                                        Colors.white.withOpacity(0.0),
+                                        Colors.white.withOpacity(0.10),
+                                        Colors.white.withOpacity(0.0),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

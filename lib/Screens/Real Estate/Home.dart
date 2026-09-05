@@ -1,20 +1,14 @@
-import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Verify/utilities/hex_color.dart';
 import '../../custom_widget/Searchbar.dart';
-import '../../model/Home_model.dart';
 import '../Insurace/Health.dart';
 import '../Services/Service_Page.dart';
 import '../Vehicle/Dashboard.dart';
 import 'Sub_Srceen/PropertyBylist.dart';
-import 'Sub_Srceen/Types/Godown.dart';
-import 'Sub_Srceen/Types/Office.dart';
-import 'Sub_Srceen/Types/farmhouse.dart';
+import 'Sub_Srceen/Types/property_type_page.dart';
 import 'Sub_Srceen/Types/flat/flat tab.dart';
-import 'Sub_Srceen/Types/shop.dart';
 import 'Visit Property/Visit Book.dart';
 
 Future<int?> getUserId() async {
@@ -31,7 +25,6 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with TickerProviderStateMixin {
   String selectedType = 'Flat';
   String _number = '';
-  Future<List<Catid>>? _futureData;
   late TabController _tabController;
   late AnimationController _bookVisitController;
 
@@ -65,28 +58,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     String number = prefs.getString('number') ?? '';
     setState(() {
       _number = number;
-      _futureData = fetchData();
     });
-  }
-
-  Future<List<Catid>> fetchData() async {
-    final url = Uri.parse(
-      "https://verifyrealestateandservices.in/WebService4.asmx/show_RealEstate_by_fieldworkarnumber?fieldworkarnumber=9711775300&looking=Flat",
-    );
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      List data = json.decode(response.body);
-      data.sort((a, b) => b['PVR_id'].compareTo(a['PVR_id']));
-      return data.take(10).map((item) => Catid.FromJson(item)).toList();
-    } else {
-      throw Exception('Failed to load data');
-    }
   }
 
   Future<void> _onRefresh() async {
-    setState(() {
-      _futureData = fetchData();
-    });
+    setState(() {});
   }
 
   @override
@@ -205,13 +181,33 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     case 'Flat':
                       return const FlatPropertyTabs();
                     case 'Godown':
-                      return const GodownPropertyPage();
+                      return const PropertyTypeListPage(
+                        typeLabel: 'Godown',
+                        endpoint:
+                            'https://verifyrealestateandservices.in/Second%20PHP%20FILE/main_application/Godown.php',
+                        wrapsDataKey: false,
+                      );
                     case 'Shop':
-                      return const ShopPropertyPage();
+                      return const PropertyTypeListPage(
+                        typeLabel: 'Shop',
+                        endpoint:
+                            'https://verifyrealestateandservices.in/Second%20PHP%20FILE/main_application/Shop.php',
+                        wrapsDataKey: true,
+                      );
                     case 'Farmhouse':
-                      return const FarmhousePropertyPage();
+                      return const PropertyTypeListPage(
+                        typeLabel: 'Farmhouse',
+                        endpoint:
+                            'https://verifyrealestateandservices.in/Second%20PHP%20FILE/main_application/farm.php',
+                        wrapsDataKey: false,
+                      );
                     case 'Commercial':
-                      return const OfficePropertyPage();
+                      return const PropertyTypeListPage(
+                        typeLabel: 'Office',
+                        endpoint:
+                            'https://verifyrealestateandservices.in/Second%20PHP%20FILE/main_application/office.php',
+                        wrapsDataKey: true,
+                      );
                     default:
                       return PropertyListByType(type: label);
                   }

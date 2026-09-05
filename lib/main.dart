@@ -50,8 +50,6 @@ Future<String> getFCMToken() async {
       final apnsToken =
       await FirebaseMessaging.instance.getAPNSToken();
 
-      debugPrint("APNS TOKEN: $apnsToken");
-
       if (apnsToken == null) {
         return "";
       }
@@ -60,13 +58,9 @@ Future<String> getFCMToken() async {
     final token =
     await FirebaseMessaging.instance.getToken();
 
-    debugPrint("FCM TOKEN: $token");
-
     return token ?? "";
 
-  } catch (e) {
-
-    debugPrint("FCM ERROR: $e");
+  } catch (_) {
 
     return "";
   }
@@ -155,8 +149,6 @@ class _MyAppState extends State<MyApp> {
         final apnsToken =
         await FirebaseMessaging.instance.getAPNSToken();
 
-        debugPrint("APNS TOKEN: $apnsToken");
-
         if (apnsToken != null) {
           await FirebaseMessaging.instance
               .subscribeToTopic("wollengod");
@@ -168,9 +160,8 @@ class _MyAppState extends State<MyApp> {
             .subscribeToTopic("wollengod");
       }
 
-    } catch (e) {
-
-      debugPrint("FCM INIT ERROR: $e");
+    } catch (_) {
+      // ignore: FCM init failures are non-fatal
     }
   }
 

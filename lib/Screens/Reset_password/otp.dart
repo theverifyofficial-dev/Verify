@@ -24,22 +24,12 @@ class _OtpState extends State<Otp> {
 
   Future<void> verifyOTP() async {
 
-    if (widget.number == "9999999999") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Password(number: widget.number),
-        ),
-      );
-      return;
-    }
-
     if (_otp.length != 6) {
       showError("Enter valid 6-digit OTP");
       return;
     }
 
-    final apiKey = "ceabde09-483f-11f0-a562-0200cd936042";
+    const apiKey = String.fromEnvironment('TWO_FACTOR_API_KEY');
 
     try {
       final url = Uri.parse(

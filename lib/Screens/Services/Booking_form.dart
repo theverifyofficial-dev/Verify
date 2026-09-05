@@ -350,7 +350,6 @@ class _ServiceBookingPageState extends State<ServiceBookingPage> {
     try {
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
-      print(response.body);
       if (response.statusCode == 200 && response.body.contains("success")) {
         _showSuccessDialog();
       } else {

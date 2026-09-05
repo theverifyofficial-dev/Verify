@@ -7,6 +7,7 @@ import 'package:Verify/utilities/theme-helper.dart';
 import 'package:Verify/custom_widget/Paths.dart';
 import 'package:Verify/utilities/hex_color.dart';
 import '../main.dart';
+import '../utilities/membership_helper.dart';
 import 'Homepage.dart';
 import 'Reset_password/forget.dart';
 import 'SignUp.dart';
@@ -48,7 +49,6 @@ class _LoginPageState extends State<LoginPage> {
         ));
     final data= json.decode(response.body);
 
-    print(data);
     if(response.statusCode==200 && data['status'] == 'success'){
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content:
@@ -64,6 +64,12 @@ class _LoginPageState extends State<LoginPage> {
       final String emailFromAPI = data['user']['Email'];       // fixed casing
       final int IDFromAPI = data['user']['id'];                // already an int
       final String mobileFromAPI = data['user']['Mobile'];
+      // NOTE: confirm exact JSON key names with backend — assumed
+// data['user']['membership_status'] and
+// data['user']['membership_expiry_date'].
+      final String membershipStatus =
+          data['user']['membership_status'] ?? MembershipHelper.statusNone;
+      final String? membershipExpiryDate = data['user']['membership_expiry_date'];
       var shared_pref= await SharedPreferences.getInstance();
       await shared_pref.setBool(SplashScreenState.KEY_LOGIN, true);
       await shared_pref.setString('name', fullNameFromAPI);
@@ -74,6 +80,11 @@ class _LoginPageState extends State<LoginPage> {
       await shared_pref.setString(
         'fcm_token',
         fcmToken,
+      );
+
+      await MembershipHelper.save(
+        status: membershipStatus,
+        expiryDate: membershipExpiryDate,
       );
 
       if (profileImage != null && profileImage.isNotEmpty) {

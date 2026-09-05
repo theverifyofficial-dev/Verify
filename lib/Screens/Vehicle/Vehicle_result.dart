@@ -56,8 +56,6 @@ class _SearchVehiclePageState extends State<SearchVehiclePage> {
 
       final data = json.decode(response.body);
 
-      print(data);
-
       if (response.statusCode == 200) {
 
         showSnack("Alert sent successfully");

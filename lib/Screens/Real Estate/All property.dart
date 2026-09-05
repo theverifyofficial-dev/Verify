@@ -11,10 +11,7 @@ import '../../custom_widget/property_card.dart';
 import '../../model/All_model.dart';
 import 'Sub_Srceen/PropertyBylist.dart';
 import 'Sub_Srceen/Types/flat/Rent_flat.dart';
-import 'Sub_Srceen/Types/Godown.dart';
-import 'Sub_Srceen/Types/Office.dart';
-import 'Sub_Srceen/Types/farmhouse.dart';
-import 'Sub_Srceen/Types/shop.dart';
+import 'Sub_Srceen/Types/property_type_page.dart';
 import 'Sub_Srceen/full property.dart';
 
 class AllProperty extends StatefulWidget {
@@ -89,20 +86,40 @@ class _AllPropertyState extends State<AllProperty> {
 
     if (selectedType == 'Office') {
       Navigator.push(context,
-          MaterialPageRoute(builder: (_) => const OfficePropertyPage()));
+          MaterialPageRoute(builder: (_) => const PropertyTypeListPage(
+            typeLabel: 'Office',
+            endpoint:
+                'https://verifyrealestateandservices.in/Second%20PHP%20FILE/main_application/office.php',
+            wrapsDataKey: true,
+          )));
     }
     else if (selectedType == 'Godown') {
       Navigator.push(context,
-          MaterialPageRoute(builder: (_) => const GodownPropertyPage()));
+          MaterialPageRoute(builder: (_) => const PropertyTypeListPage(
+            typeLabel: 'Godown',
+            endpoint:
+                'https://verifyrealestateandservices.in/Second%20PHP%20FILE/main_application/Godown.php',
+            wrapsDataKey: false,
+          )));
     }
     else if (selectedType == 'Shop') {
       Navigator.push(
-          context, MaterialPageRoute(builder: (_) => const ShopPropertyPage()));
+          context, MaterialPageRoute(builder: (_) => const PropertyTypeListPage(
+            typeLabel: 'Shop',
+            endpoint:
+                'https://verifyrealestateandservices.in/Second%20PHP%20FILE/main_application/Shop.php',
+            wrapsDataKey: true,
+          )));
     }
 
     else if (selectedType == 'Farmhouse') {
       Navigator.push(context,
-          MaterialPageRoute(builder: (_) => const FarmhousePropertyPage()));
+          MaterialPageRoute(builder: (_) => const PropertyTypeListPage(
+            typeLabel: 'Farmhouse',
+            endpoint:
+                'https://verifyrealestateandservices.in/Second%20PHP%20FILE/main_application/farm.php',
+            wrapsDataKey: false,
+          )));
     }
     else if (selectedType == 'Flat') {
       Navigator.push(

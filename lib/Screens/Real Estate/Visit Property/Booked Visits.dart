@@ -103,8 +103,8 @@ class _PropertyVisitHistoryPageState
           visits = data.reversed.toList();
         }
       }
-    } catch (e) {
-      debugPrint(e.toString());
+    } catch (_) {
+      // ignore: fetch errors just leave the visit list empty
     }
 
     setState(() {
