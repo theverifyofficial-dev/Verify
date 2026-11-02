@@ -5,6 +5,7 @@ import 'package:Verify/Screens/profile.dart';
 import 'package:Verify/utilities/hex_color.dart';
 import 'package:flutter/services.dart';
 import '../custom_widget/Paths.dart';
+import 'PropertyManagement/pm_root_screen.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -19,6 +20,7 @@ class _HomepageState extends State<Homepage> {
 
   final List<Widget> pages = const [
     Home(),
+    PmRootScreen(),
     Profile(),
   ];
 
@@ -114,6 +116,10 @@ class _HomepageState extends State<Homepage> {
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.apartment_outlined),
+              label: 'Property Management',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.account_circle_rounded),

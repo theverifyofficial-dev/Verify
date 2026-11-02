@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Verify/utilities/hex_color.dart';
-import '../../Screens/Real Estate/Sub_Srceen/full property.dart';
+import '../Screens/Real Estate/Sub_Srceen/full property.dart';
 import '../model/filter_model.dart';
 
 class SearchPropertyCard extends StatelessWidget {

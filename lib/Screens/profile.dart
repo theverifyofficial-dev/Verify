@@ -10,7 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:Verify/Screens/Loginpage.dart';
 import 'package:Verify/custom_widget/Paths.dart';
 import 'package:intl/intl.dart';
-import '../../utilities/membership_helper.dart';   // adjust path to where you saved it
+import '../utilities/membership_helper.dart';   // adjust path to where you saved it
 import '../utilities/hex_color.dart';
 import 'Membership/membership_page.dart';
 import 'Real Estate/Visit Property/Booked Visits.dart';
@@ -728,7 +728,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               const SizedBox(height: 20),
               _infoTile("Email", email, Icons.email),
               _infoTile("Phone", number, Icons.phone),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
 
               _optionTile(
                 "My Visits",

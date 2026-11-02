@@ -4,9 +4,9 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../custom_widget/back_button.dart';
-import '../../../utilities/hex_color.dart';
-import '../../../utilities/membership_helper.dart';
+import '../../custom_widget/back_button.dart';
+import '../../utilities/hex_color.dart';
+import '../../utilities/membership_helper.dart';
 
 class MembershipPurchasePage extends StatefulWidget {
   const MembershipPurchasePage({super.key});
